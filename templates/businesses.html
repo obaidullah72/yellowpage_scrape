@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Businesses | LeadHarvester{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Businesses</h1>
+    <div class="btn-group">
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'business_export' 'csv' %}?{{ request.GET.urlencode }}">CSV</a>
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'business_export' 'xlsx' %}?{{ request.GET.urlencode }}">Excel</a>
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'business_export' 'json' %}?{{ request.GET.urlencode }}">JSON</a>
+    </div>
+</div>
+
+<form class="card card-body shadow-sm mb-3" method="get">
+    <div class="row g-2">
+        <div class="col-md-3"><input class="form-control" type="search" name="q" placeholder="Search" value="{{ filters.q }}"></div>
+        <div class="col-md-3"><input class="form-control" type="text" name="keyword" placeholder="Keyword" value="{{ filters.keyword }}"></div>
+        <div class="col-md-2"><input class="form-control" type="text" name="category" placeholder="Category" value="{{ filters.category }}"></div>
+        <div class="col-md-2"><input class="form-control" type="text" name="location" placeholder="Location" value="{{ filters.location }}"></div>
+        <div class="col-md-2 d-grid"><button class="btn btn-primary" type="submit">Filter</button></div>
+    </div>
+</form>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Rating</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for business in businesses %}
+                <tr>
+                    <td><a href="{% url 'business_detail' business.pk %}">{{ business.name }}</a></td>
+                    <td>{{ business.category|default:"-" }}</td>
+                    <td>{{ business.city }} {{ business.state }}</td>
+                    <td>{{ business.phone_number|default:"-" }}</td>
+                    <td>{{ business.email|default:"-" }}</td>
+                    <td>{{ business.rating|default:"-" }}</td>
+                </tr>
+            {% empty %}
+                <tr><td class="text-center text-muted py-4" colspan="6">No matching businesses.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if is_paginated %}
+    <nav class="mt-3">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+{% endblock %}

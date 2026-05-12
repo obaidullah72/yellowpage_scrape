@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | LeadHarvester{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Dashboard</h1>
+        <p class="text-muted mb-0">Track YellowPages notifiers and scraped leads.</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'notifier_create' %}">Create Notifier</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Total Notifiers</p>
+                <h2 class="mb-0">{{ total_notifiers }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Businesses Scraped</p>
+                <h2 class="mb-0">{{ total_businesses }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Recent Logs</p>
+                <h2 class="mb-0">{{ recent_logs|length }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between">
+                <strong>Recent Scraped Results</strong>
+                <a href="{% url 'business_list' %}">View all</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Name</th><th>Category</th><th>Location</th><th>Phone</th></tr></thead>
+                    <tbody>
+                    {% for business in recent_businesses %}
+                        <tr>
+                            <td><a href="{% url 'business_detail' business.pk %}">{{ business.name }}</a></td>
+                            <td>{{ business.category|default:"-" }}</td>
+                            <td>{{ business.city }} {{ business.state }}</td>
+                            <td>{{ business.phone_number|default:"-" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="text-muted text-center py-4">No businesses scraped yet.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white"><strong>Your Notifiers</strong></div>
+            <div class="list-group list-group-flush">
+                {% for notifier in notifiers %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>{{ notifier.keyword }}</strong>
+                                <div class="text-muted small">{{ notifier.location }} · {{ notifier.get_frequency_display }} · {{ notifier.business_count }} leads</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a class="btn btn-sm btn-outline-secondary" href="{% url 'notifier_update' notifier.pk %}">Edit</a>
+                                <form method="post" action="{% url 'notifier_run' notifier.pk %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-sm btn-outline-primary" type="submit">Run</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="list-group-item text-muted">Create a notifier to start scraping.</div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-header bg-white"><strong>Latest Scrape Logs</strong></div>
+            <div class="list-group list-group-flush">
+                {% for log in recent_logs %}
+                    <div class="list-group-item">
+                        <span class="badge text-bg-{% if log.status == 'success' %}success{% elif log.status == 'error' %}danger{% else %}secondary{% endif %}">{{ log.status }}</span>
+                        <span class="ms-2">{{ log.notifier }} · {{ log.new_businesses }} new</span>
+                    </div>
+                {% empty %}
+                    <div class="list-group-item text-muted">No scrape logs yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

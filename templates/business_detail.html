@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ business.name }} | LeadHarvester{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="h3 mb-1">{{ business.name }}</h1>
+        <p class="text-muted mb-0">{{ business.category }}{% if business.sub_category %} · {{ business.sub_category }}{% endif %}</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'business_list' %}">Back</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5">Contact Info</h2>
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Phone</dt><dd class="col-sm-9">{{ business.phone_number|default:"-" }}</dd>
+                    <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ business.email|default:"-" }}</dd>
+                    <dt class="col-sm-3">Website</dt><dd class="col-sm-9">{% if business.website %}<a href="{{ business.website }}" target="_blank">{{ business.website }}</a>{% else %}-{% endif %}</dd>
+                    <dt class="col-sm-3">YellowPages</dt><dd class="col-sm-9"><a href="{{ business.yellowpages_url }}" target="_blank">{{ business.yellowpages_url }}</a></dd>
+                </dl>
+            </div>
+        </div>
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5">Address</h2>
+                <p>{{ business.full_address|default:"-" }}</p>
+                <a class="btn btn-sm btn-outline-primary" href="{{ business.google_maps_url }}" target="_blank">Open in Google Maps</a>
+            </div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5">Description</h2>
+                <p class="mb-0">{{ business.description|default:"No description found." }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        {% if business.logo_image %}
+            <img class="img-fluid rounded shadow-sm mb-4" src="{{ business.logo_image }}" alt="{{ business.name }}">
+        {% endif %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5">Ratings</h2>
+                <p class="mb-1">Rating: {{ business.rating|default:"-" }}</p>
+                <p class="mb-0">Reviews: {{ business.review_count|default:"-" }}</p>
+            </div>
+        </div>
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5">Working Hours</h2>
+                {% if business.working_hours %}
+                    <ul class="list-unstyled mb-0">
+                        {% for day, hours in business.working_hours.items %}
+                            <li><strong>{{ day }}:</strong> {{ hours }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted mb-0">No hours found.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5">Social Links</h2>
+                {% if business.social_media_links %}
+                    {% for link in business.social_media_links %}
+                        <a class="d-block" href="{{ link }}" target="_blank">{{ link }}</a>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">No social links found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Notifier | LeadHarvester{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h4 mb-3">{% if object %}Edit Notifier{% else %}Create Notifier{% endif %}</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    <div class="row">
+                        {% for field in form %}
+                            <div class="{% if field.name == 'is_active' %}col-12{% else %}col-md-6{% endif %} mb-3">
+                                {% if field.name == 'is_active' %}
+                                    <div class="form-check mt-4">
+                                        {{ field }}
+                                        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    </div>
+                                {% else %}
+                                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    {{ field }}
+                                {% endif %}
+                                {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button class="btn btn-primary" type="submit">Save Notifier</button>
+                    <a class="btn btn-outline-secondary" href="{% url 'dashboard' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
