@@ -133,6 +133,8 @@ YELLOWPAGES_USER_AGENT = os.getenv(
 )
 SCRAPER_DELAY_SECONDS = float(os.getenv("SCRAPER_DELAY_SECONDS", "2"))
 SCRAPER_TIMEOUT_SECONDS = int(os.getenv("SCRAPER_TIMEOUT_SECONDS", "20"))
+# When True, use Playwright (real browser) if Yellow Pages returns 403 to plain HTTP clients.
+SCRAPER_USE_PLAYWRIGHT = os.getenv("SCRAPER_USE_PLAYWRIGHT", "true").lower() in {"1", "true", "yes", "on"}
 RUN_SCHEDULER = os.getenv("RUN_SCHEDULER", "False").lower() in {"1", "true", "yes", "on"}
 
 LOGGING = {

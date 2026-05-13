@@ -21,8 +21,9 @@ logger = logging.getLogger(__name__)
 BASE_URL = "https://www.yellowpages.com"
 USER_AGENTS = [
     settings.YELLOWPAGES_USER_AGENT,
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
 ]
 
 
@@ -34,71 +35,188 @@ class ScrapeResult:
 
 
 class YellowPagesScraper:
+    """Fetch Yellow Pages HTML via a warmed requests session; fall back to Playwright on 403."""
+
     def __init__(self, notifier):
         self.notifier = notifier
         self.session = requests.Session()
+        self._session_warmed = False
+        self._pw = None
+        self._pw_browser = None
+        self._pw_context = None
+
+    def close(self):
+        if self._pw_context is not None:
+            try:
+                self._pw_context.close()
+            except Exception:
+                logger.debug("Playwright context close failed", exc_info=True)
+            self._pw_context = None
+        if self._pw_browser is not None:
+            try:
+                self._pw_browser.close()
+            except Exception:
+                logger.debug("Playwright browser close failed", exc_info=True)
+            self._pw_browser = None
+        if self._pw is not None:
+            try:
+                self._pw.stop()
+            except Exception:
+                logger.debug("Playwright stop failed", exc_info=True)
+            self._pw = None
 
     def scrape(self):
         result = ScrapeResult()
-        for page in range(1, self.notifier.max_pages + 1):
-            try:
-                html = self._fetch_search_page(page)
-            except requests.RequestException:
-                logger.exception("Failed to fetch YellowPages page %s", page)
-                continue
+        try:
+            for page in range(1, self.notifier.max_pages + 1):
+                try:
+                    html = self._fetch_search_page(page)
+                except requests.HTTPError as exc:
+                    if exc.response is not None and exc.response.status_code in (401, 403):
+                        logger.error(
+                            "Yellow Pages returned %s (blocked). "
+                            "Set SCRAPER_USE_PLAYWRIGHT=true and run: playwright install chromium",
+                            exc.response.status_code,
+                        )
+                        break
+                    logger.exception("Failed to fetch YellowPages page %s", page)
+                    break
+                except requests.RequestException:
+                    logger.exception("Failed to fetch YellowPages page %s", page)
+                    break
 
-            soup = BeautifulSoup(html, "html.parser")
-            cards = soup.select(".result")
-            if not cards and self._looks_blocked(soup):
-                raise RuntimeError("YellowPages anti-bot protection or captcha detected")
+                soup = BeautifulSoup(html, "html.parser")
+                cards = soup.select(".result")
+                if not cards and self._looks_blocked(soup):
+                    raise RuntimeError("YellowPages anti-bot protection or captcha detected")
 
-            result.pages_scraped += 1
-            for card in cards:
-                business_data = self._parse_card(card)
-                if not business_data.get("yellowpages_url"):
-                    continue
-                detail_data = self._fetch_detail_data(business_data["yellowpages_url"])
-                business_data.update({key: value for key, value in detail_data.items() if value})
-                result.businesses_found += 1
-                _, created = self._store_business(business_data)
-                if created:
-                    result.new_businesses += 1
-                    logger.info(
-                        "New business saved for user %s: %s",
-                        self.notifier.user_id,
-                        business_data.get("name"),
-                    )
-            time.sleep(settings.SCRAPER_DELAY_SECONDS + random.uniform(0.2, 1.5))
+                result.pages_scraped += 1
+                for card in cards:
+                    business_data = self._parse_card(card)
+                    if not business_data.get("yellowpages_url"):
+                        continue
+                    detail_data = self._fetch_detail_data(business_data["yellowpages_url"])
+                    business_data.update({key: value for key, value in detail_data.items() if value})
+                    result.businesses_found += 1
+                    _, created = self._store_business(business_data)
+                    if created:
+                        result.new_businesses += 1
+                        logger.info(
+                            "New business saved for user %s: %s",
+                            self.notifier.user_id,
+                            business_data.get("name"),
+                        )
+                time.sleep(settings.SCRAPER_DELAY_SECONDS + random.uniform(0.2, 1.5))
+        finally:
+            self.close()
         return result
 
-    def _headers(self):
-        return {
-            "User-Agent": random.choice(USER_AGENTS),
-            "Accept-Language": "en-US,en;q=0.9",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        }
+    def _build_search_terms(self):
+        """Avoid redundant `keyword + category` when they are the same phrase (e.g. car wash + Car Wash)."""
+        kw = (self.notifier.keyword or "").strip()
+        cat = (self.notifier.category or "").strip()
+        if not cat:
+            return kw
+        kw_l, cat_l = kw.lower(), cat.lower()
+        if cat_l in kw_l or kw_l in cat_l.replace(" ", ""):
+            return kw
+        return f"{kw} {cat}".strip()
 
-    def _fetch_search_page(self, page):
-        params = {
-            "search_terms": self.notifier.keyword,
-            "geo_location_terms": self.notifier.location,
-            "page": page,
+    def _warm_session(self):
+        if self._session_warmed:
+            return
+        try:
+            resp = self.session.get(
+                f"{BASE_URL}/",
+                headers=self._browser_headers(referer=None, sec_fetch_site="none"),
+                timeout=settings.SCRAPER_TIMEOUT_SECONDS,
+                allow_redirects=True,
+            )
+            logger.debug("YellowPages session warm GET / status=%s", resp.status_code)
+        except requests.RequestException:
+            logger.warning("YellowPages homepage warm failed", exc_info=True)
+        self._session_warmed = True
+
+    def _browser_headers(self, *, referer: str | None, sec_fetch_site: str):
+        ua = random.choice(USER_AGENTS)
+        headers = {
+            "User-Agent": ua,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": sec_fetch_site,
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+            "DNT": "1",
         }
-        if self.notifier.category:
-            params["search_terms"] = f"{self.notifier.keyword} {self.notifier.category}".strip()
-        response = self.session.get(BASE_URL + "/search", params=params, headers=self._headers(), timeout=settings.SCRAPER_TIMEOUT_SECONDS)
+        if referer:
+            headers["Referer"] = referer
+        return headers
+
+    def _fetch_html(self, url: str, *, referer: str) -> str:
+        self._warm_session()
+        headers = self._browser_headers(referer=referer, sec_fetch_site="same-origin")
+        response = self.session.get(
+            url,
+            headers=headers,
+            timeout=settings.SCRAPER_TIMEOUT_SECONDS,
+            allow_redirects=True,
+        )
+        if response.status_code == 403 and settings.SCRAPER_USE_PLAYWRIGHT:
+            logger.warning("YellowPages returned 403; retrying with Playwright (browser)")
+            return self._playwright_get(url)
         response.raise_for_status()
         return response.text
+
+    def _playwright_get(self, url: str) -> str:
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError as exc:
+            raise RuntimeError(
+                "Yellow Pages blocked the request (403). Install Playwright: "
+                "pip install playwright && playwright install chromium"
+            ) from exc
+
+        if self._pw is None:
+            self._pw = sync_playwright().start()
+            self._pw_browser = self._pw.chromium.launch(headless=True)
+            self._pw_context = self._pw_browser.new_context(
+                user_agent=settings.YELLOWPAGES_USER_AGENT,
+                viewport={"width": 1366, "height": 900},
+                locale="en-US",
+            )
+        page = self._pw_context.new_page()
+        try:
+            page.goto(
+                url,
+                wait_until="domcontentloaded",
+                timeout=max(30_000, settings.SCRAPER_TIMEOUT_SECONDS * 1000),
+            )
+            time.sleep(1.5 + random.uniform(0, 0.8))
+            return page.content()
+        finally:
+            page.close()
+
+    def _fetch_search_page(self, page_num: int) -> str:
+        params = {
+            "search_terms": self._build_search_terms(),
+            "geo_location_terms": self.notifier.location,
+            "page": page_num,
+        }
+        req = requests.Request("GET", f"{BASE_URL}/search", params=params)
+        prep = self.session.prepare_request(req)
+        return self._fetch_html(prep.url, referer=f"{BASE_URL}/")
 
     def _fetch_detail_data(self, yellowpages_url):
         try:
             time.sleep(random.uniform(0.5, 1.5))
-            response = self.session.get(yellowpages_url, headers=self._headers(), timeout=settings.SCRAPER_TIMEOUT_SECONDS)
-            response.raise_for_status()
+            html = self._fetch_html(yellowpages_url, referer=f"{BASE_URL}/")
         except requests.RequestException:
             logger.warning("Could not fetch business detail page: %s", yellowpages_url, exc_info=True)
             return {}
-        return self._parse_detail(BeautifulSoup(response.text, "html.parser"))
+        return self._parse_detail(BeautifulSoup(html, "html.parser"))
 
     def _parse_card(self, card):
         name_node = card.select_one(".business-name span") or card.select_one(".business-name")
