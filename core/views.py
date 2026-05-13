@@ -48,7 +48,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             {
                 "total_notifiers": user_notifiers.count(),
                 "total_businesses": businesses.count(),
-                "recent_businesses": businesses[:20],
+                "recent_businesses": businesses.order_by("-first_seen_at")[:10],
                 "recent_logs": ScrapeLog.objects.filter(notifier__user=self.request.user)[:5],
                 "notifiers": user_notifiers.annotate(business_count=Count("businesses"))[:8],
             }
