@@ -277,7 +277,7 @@ class YellowPagesScraper:
             lat, lng = extract_lat_lng(map_node.get("href", ""))
 
         return {
-            "email": normalize_blank(extract_email(email_node.get("href", "")) if email_node else ""),
+            "email": normalize_blank(extract_yellowpages_detail_email(email_node)),
             "website": clean_external_url(website_node.get("href")) if website_node else "",
             "description": self._text(description_node),
             "working_hours": hours,
@@ -379,10 +379,83 @@ def parse_decimal(value):
         return None
 
 
-def extract_email(value):
-    if value.startswith("mailto:"):
-        return value.replace("mailto:", "").split("?")[0]
-    return value
+_BUSINESS_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]{2,}$", re.IGNORECASE)
+
+
+def _decode_cloudflare_email_protection_hex(hex_payload: str) -> str:
+    """Decode Cloudflare `data-cfemail` / `.../email-protection#...` XOR hex payload."""
+    hex_clean = re.sub(r"[^0-9a-fA-F]", "", hex_payload or "")
+    if len(hex_clean) < 4 or len(hex_clean) % 2 == 1:
+        return ""
+    try:
+        key = int(hex_clean[0:2], 16)
+    except ValueError:
+        return ""
+    out = []
+    for i in range(2, len(hex_clean), 2):
+        try:
+            byte = int(hex_clean[i : i + 2], 16) ^ key
+        except ValueError:
+            return ""
+        if byte < 32 or byte > 127:
+            return ""
+        out.append(chr(byte))
+    return "".join(out)
+
+
+def _email_from_cloudflare_href(href: str) -> str:
+    if not href or "email-protection" not in href.lower():
+        return ""
+    parsed = urlparse(href)
+    fragment = (parsed.fragment or "").strip()
+    if not fragment and "#" in href:
+        fragment = href.rsplit("#", 1)[-1].strip()
+    return _decode_cloudflare_email_protection_hex(fragment)
+
+
+def _mailto_address(href: str) -> str:
+    if not href.startswith("mailto:"):
+        return ""
+    return href.replace("mailto:", "").split("?", 1)[0].strip()
+
+
+def _cfemail_from_element(element) -> str:
+    if not element:
+        return ""
+    raw = (element.get("data-cfemail") or "").strip()
+    if raw:
+        return _decode_cloudflare_email_protection_hex(raw)
+    nested = element.select_one("[data-cfemail]")
+    if nested:
+        raw = (nested.get("data-cfemail") or "").strip()
+        if raw:
+            return _decode_cloudflare_email_protection_hex(raw)
+    return ""
+
+
+def _is_plausible_email(value: str) -> bool:
+    return bool(value and _BUSINESS_EMAIL_RE.match(value))
+
+
+def extract_yellowpages_detail_email(email_node):
+    """Resolve email from YP detail `a.email-business` (mailto, Cloudflare href, or data-cfemail)."""
+    if not email_node:
+        return ""
+    href = (email_node.get("href") or "").strip()
+    candidates = []
+    m = _mailto_address(href)
+    if m:
+        candidates.append(m)
+    cf_href = _email_from_cloudflare_href(href)
+    if cf_href:
+        candidates.append(cf_href)
+    cf_attr = _cfemail_from_element(email_node)
+    if cf_attr:
+        candidates.append(cf_attr)
+    for c in candidates:
+        if _is_plausible_email(c):
+            return c
+    return ""
 
 
 def extract_lat_lng(url):
