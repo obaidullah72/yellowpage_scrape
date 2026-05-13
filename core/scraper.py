@@ -14,7 +14,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from .models import Business, Notifier, ScrapeLog
-from .services import next_run_for_frequency, notify_user
+from .services import next_run_for_frequency
 
 logger = logging.getLogger(__name__)
 
@@ -63,9 +63,10 @@ class YellowPagesScraper:
                 _, created = self._store_business(business_data)
                 if created:
                     result.new_businesses += 1
-                    notify_user(
-                        self.notifier.user,
-                        f"New lead found: {business_data.get('name')} ({business_data.get('phone_number') or 'no phone'})",
+                    logger.info(
+                        "New business saved for user %s: %s",
+                        self.notifier.user_id,
+                        business_data.get("name"),
                     )
             time.sleep(settings.SCRAPER_DELAY_SECONDS + random.uniform(0.2, 1.5))
         return result
@@ -210,16 +211,11 @@ def run_notifier_scrape(notifier):
         log.pages_scraped = result.pages_scraped
         log.businesses_found = result.businesses_found
         log.new_businesses = result.new_businesses
-        notify_user(
-            notifier.user,
-            f"Scrape completed for {notifier.keyword} in {notifier.location}: {result.new_businesses} new businesses.",
-        )
     except Exception as exc:
         logger.exception("Scrape failed for notifier %s", notifier.pk)
         log.status = ScrapeLog.STATUS_ERROR
         log.message = "Scrape failed"
         log.error_details = str(exc)
-        notify_user(notifier.user, f"Scrape failed for {notifier.keyword}: {exc}")
     finally:
         log.completed_at = timezone.now()
         log.save()

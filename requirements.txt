@@ -6,5 +6,4 @@ beautifulsoup4
 playwright
 APScheduler
 django-apscheduler
-twilio
 openpyxl

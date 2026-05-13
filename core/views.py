@@ -5,7 +5,8 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
+from urllib.parse import urlencode
 from django.views import View
 from django.views.generic import CreateView, DetailView, FormView, ListView, TemplateView, UpdateView
 
@@ -46,7 +47,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             {
                 "total_notifiers": user_notifiers.count(),
                 "total_businesses": businesses.count(),
-                "recent_businesses": businesses[:8],
+                "recent_businesses": businesses[:20],
                 "recent_logs": ScrapeLog.objects.filter(notifier__user=self.request.user)[:5],
                 "notifiers": user_notifiers.annotate(business_count=Count("businesses"))[:8],
             }
@@ -104,10 +105,20 @@ class RunNotifierView(LoginRequiredMixin, View):
         notifier = get_object_or_404(Notifier, pk=pk, user=request.user)
         log = run_notifier_scrape(notifier)
         if log.status == ScrapeLog.STATUS_SUCCESS:
-            messages.success(request, f"Scrape completed: {log.new_businesses} new businesses found.")
+            messages.success(
+                request,
+                f"Scrape finished: {log.new_businesses} new businesses saved for “{notifier.keyword}”. "
+                "Review them in your leads list.",
+            )
         else:
             messages.error(request, f"Scrape failed: {log.error_details}")
-        return redirect("dashboard")
+        params = {}
+        if notifier.keyword.strip():
+            params["keyword"] = notifier.keyword.strip()
+        url = reverse("business_list")
+        if params:
+            url = f"{url}?{urlencode(params)}"
+        return redirect(url)
 
 
 class BusinessListView(LoginRequiredMixin, ListView):

@@ -4,7 +4,7 @@
 <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-4 pb-1">
     <div>
         <h1 class="h2 mb-1 lh-page-title">Dashboard</h1>
-        <p class="lh-page-lead mb-0">Track YellowPages notifiers and scraped leads.</p>
+        <p class="lh-page-lead mb-0">Run notifiers and browse every scraped lead on the <a href="{% url 'business_list' %}">Businesses</a> page.</p>
     </div>
     <a class="btn btn-primary btn-lg rounded-3 px-4" href="{% url 'notifier_create' %}">
         <i class="bi bi-plus-lg" aria-hidden="true"></i> Create Notifier
@@ -83,6 +83,10 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                <div class="px-3 py-2 border-top bg-body-secondary bg-opacity-50 small text-secondary d-flex align-items-center gap-2">
+                    <i class="bi bi-list-ul text-primary" aria-hidden="true"></i>
+                    <span>Full searchable list with filters and export: <a href="{% url 'business_list' %}">Open Businesses</a></span>
+                </div>
             </div>
         </div>
     </div>

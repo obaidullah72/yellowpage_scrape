@@ -4,12 +4,9 @@ import json
 import logging
 from datetime import timedelta
 
-from django.conf import settings
 from django.http import HttpResponse
 from django.utils import timezone
 from openpyxl import Workbook
-from twilio.base.exceptions import TwilioRestException
-from twilio.rest import Client
 
 from .models import Business, Notifier
 
@@ -31,32 +28,6 @@ def next_run_for_frequency(frequency, from_time=None):
         Notifier.FREQUENCY_WEEKLY: timedelta(weeks=1),
     }
     return base + intervals.get(frequency, timedelta(hours=1))
-
-
-def send_whatsapp(to_number, message):
-    if not to_number:
-        logger.info("Skipping WhatsApp message because recipient is missing")
-        return None
-
-    if not all([settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN, settings.TWILIO_WHATSAPP_NUMBER]):
-        logger.warning("Skipping WhatsApp message because Twilio settings are incomplete")
-        return None
-
-    try:
-        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-        return client.messages.create(
-            body=message,
-            from_=settings.TWILIO_WHATSAPP_NUMBER,
-            to=f"whatsapp:{to_number}" if not to_number.startswith("whatsapp:") else to_number,
-        )
-    except TwilioRestException:
-        logger.exception("Twilio WhatsApp delivery failed")
-        return None
-
-
-def notify_user(user, message):
-    profile = ensure_profile(user)
-    return send_whatsapp(profile.whatsapp_number, message)
 
 
 def business_export_queryset(request):
