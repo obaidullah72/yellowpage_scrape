@@ -1,24 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Register | LeadHarvester{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card lh-card lh-auth-card border-0">
-            <div class="card-body">
-                <h1 class="h4 mb-1 lh-page-title">Create account</h1>
-                <p class="lh-page-lead small mb-4">Set up your profile to run YellowPages notifiers.</p>
-                <form method="post">
+<div class="row justify-content-center py-4 py-md-5">
+    <div class="col-md-7 col-lg-6 col-xl-5">
+        <div class="card lh-auth-card border-0">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="lh-auth-icon mx-auto">
+                        <i class="bi bi-person-plus" aria-hidden="true"></i>
+                    </div>
+                    <h1 class="h4 mb-1 lh-page-title">Create account</h1>
+                    <p class="lh-page-lead small mb-0">Set up your profile to run YellowPages notifiers.</p>
+                </div>
+                <form method="post" class="vstack gap-3">
                     {% csrf_token %}
-                    {{ form.non_field_errors }}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
+                    {% endif %}
                     {% for field in form %}
-                        <div class="mb-3">
+                        <div>
                             <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
                             {{ field }}
                             {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
                             {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                         </div>
                     {% endfor %}
-                    <button class="btn btn-primary w-100" type="submit">Register</button>
+                    <button class="btn btn-primary btn-lg w-100 rounded-3 mt-2" type="submit">
+                        <i class="bi bi-check2-circle me-1" aria-hidden="true"></i> Register
+                    </button>
                 </form>
             </div>
         </div>

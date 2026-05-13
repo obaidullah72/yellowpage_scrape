@@ -2,28 +2,53 @@
 {% block title %}Businesses | LeadHarvester{% endblock %}
 {% block content %}
 <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-start gap-3 mb-4">
-    <h1 class="h2 mb-0 lh-page-title">Businesses</h1>
-    <div class="btn-group">
-        <a class="btn btn-outline-secondary btn-sm" href="{% url 'business_export' 'csv' %}?{{ request.GET.urlencode }}">CSV</a>
-        <a class="btn btn-outline-secondary btn-sm" href="{% url 'business_export' 'xlsx' %}?{{ request.GET.urlencode }}">Excel</a>
-        <a class="btn btn-outline-secondary btn-sm" href="{% url 'business_export' 'json' %}?{{ request.GET.urlencode }}">JSON</a>
+    <div>
+        <h1 class="h2 mb-1 lh-page-title">Businesses</h1>
+        <p class="lh-page-lead small mb-0">Search and export scraped Yellow Pages leads.</p>
+    </div>
+    <div class="btn-group shadow-sm" role="group" aria-label="Export">
+        <a class="btn btn-outline-primary btn-sm rounded-start-3" href="{% url 'business_export' 'csv' %}?{{ request.GET.urlencode }}"><i class="bi bi-filetype-csv me-1" aria-hidden="true"></i> CSV</a>
+        <a class="btn btn-outline-primary btn-sm" href="{% url 'business_export' 'xlsx' %}?{{ request.GET.urlencode }}"><i class="bi bi-file-earmark-spreadsheet me-1" aria-hidden="true"></i> Excel</a>
+        <a class="btn btn-outline-primary btn-sm rounded-end-3" href="{% url 'business_export' 'json' %}?{{ request.GET.urlencode }}"><i class="bi bi-braces me-1" aria-hidden="true"></i> JSON</a>
     </div>
 </div>
 
-<form class="card lh-card border-0 card-body mb-4" method="get">
-    <div class="row g-2">
-        <div class="col-md-3"><input class="form-control" type="search" name="q" placeholder="Search" value="{{ filters.q }}"></div>
-        <div class="col-md-3"><input class="form-control" type="text" name="keyword" placeholder="Keyword" value="{{ filters.keyword }}"></div>
-        <div class="col-md-2"><input class="form-control" type="text" name="category" placeholder="Category" value="{{ filters.category }}"></div>
-        <div class="col-md-2"><input class="form-control" type="text" name="location" placeholder="Location" value="{{ filters.location }}"></div>
-        <div class="col-md-2 d-grid"><button class="btn btn-primary" type="submit">Filter</button></div>
+<div class="card lh-card border-0 shadow-sm mb-4">
+    <div class="card-body p-3 p-md-4">
+        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+            <i class="bi bi-funnel text-primary fs-5" aria-hidden="true"></i>
+            <span class="fw-semibold">Filters</span>
+        </div>
+        <form method="get">
+            <div class="row g-2 g-md-3 align-items-end">
+                <div class="col-6 col-md-3">
+                    <label class="form-label small text-secondary mb-1">Search</label>
+                    <input class="form-control" type="search" name="q" placeholder="Name, phone…" value="{{ filters.q }}">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small text-secondary mb-1">Keyword</label>
+                    <input class="form-control" type="text" name="keyword" placeholder="Keyword" value="{{ filters.keyword }}">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-secondary mb-1">Category</label>
+                    <input class="form-control" type="text" name="category" placeholder="Category" value="{{ filters.category }}">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-secondary mb-1">Location</label>
+                    <input class="form-control" type="text" name="location" placeholder="Location" value="{{ filters.location }}">
+                </div>
+                <div class="col-12 col-md-2 d-grid">
+                    <button class="btn btn-primary rounded-3" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i> Apply</button>
+                </div>
+            </div>
+        </form>
     </div>
-</form>
+</div>
 
-<div class="card lh-card border-0">
+<div class="card lh-card border-0 shadow-sm overflow-hidden">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead>
+            <thead class="table-light">
             <tr>
                 <th>Name</th>
                 <th>Category</th>
@@ -36,15 +61,15 @@
             <tbody>
             {% for business in businesses %}
                 <tr>
-                    <td><a href="{% url 'business_detail' business.pk %}">{{ business.name }}</a></td>
-                    <td>{{ business.category|default:"-" }}</td>
-                    <td>{{ business.city }} {{ business.state }}</td>
-                    <td>{{ business.phone_number|default:"-" }}</td>
-                    <td>{{ business.email|default:"-" }}</td>
-                    <td>{{ business.rating|default:"-" }}</td>
+                    <td class="fw-medium"><a class="text-decoration-none" href="{% url 'business_detail' business.pk %}">{{ business.name }}</a></td>
+                    <td>{{ business.category|default:"—" }}</td>
+                    <td class="text-secondary">{{ business.city }} {{ business.state }}</td>
+                    <td>{{ business.phone_number|default:"—" }}</td>
+                    <td class="small">{{ business.email|default:"—" }}</td>
+                    <td>{% if business.rating %}<span class="badge text-bg-light text-dark border"><i class="bi bi-star-fill text-warning me-1" aria-hidden="true"></i>{{ business.rating }}</span>{% else %}—{% endif %}</td>
                 </tr>
             {% empty %}
-                <tr><td class="text-center text-muted py-4" colspan="6">No matching businesses.</td></tr>
+                <tr><td class="lh-empty text-center text-secondary py-5" colspan="6"><i class="bi bi-search d-block mb-2 fs-2 opacity-50" aria-hidden="true"></i>No matching businesses.</td></tr>
             {% endfor %}
             </tbody>
         </table>
@@ -52,14 +77,14 @@
 </div>
 
 {% if is_paginated %}
-    <nav class="mt-3">
-        <ul class="pagination">
+    <nav class="mt-4 d-flex justify-content-center" aria-label="Pagination">
+        <ul class="pagination mb-0">
             {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                <li class="page-item"><a class="page-link rounded-3 me-1" href="?page={{ page_obj.previous_page_number }}"><i class="bi bi-chevron-left" aria-hidden="true"></i> Prev</a></li>
             {% endif %}
-            <li class="page-item active"><span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+            <li class="page-item active"><span class="page-link rounded-3">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
             {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                <li class="page-item"><a class="page-link rounded-3 ms-1" href="?page={{ page_obj.next_page_number }}">Next <i class="bi bi-chevron-right" aria-hidden="true"></i></a></li>
             {% endif %}
         </ul>
     </nav>

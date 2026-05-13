@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Notifier, UserProfile
+from .models import Notifier, UserProfile, YellowPagesCategory, YellowPagesLocation
 
 
 class BootstrapFormMixin:
@@ -11,6 +11,8 @@ class BootstrapFormMixin:
             widget = field.widget
             if isinstance(widget, forms.CheckboxInput):
                 widget.attrs.setdefault("class", "form-check-input")
+            elif isinstance(widget, forms.Select):
+                widget.attrs.setdefault("class", "form-select")
             else:
                 widget.attrs.setdefault("class", "form-control")
 
@@ -71,6 +73,14 @@ class ProfileForm(BootstrapFormMixin, forms.ModelForm):
 
 
 class NotifierForm(BootstrapFormMixin, forms.ModelForm):
+    category = forms.ChoiceField(
+        required=False,
+        help_text="Pulled from your seeded Yellow Pages category catalog.",
+    )
+    location = forms.ChoiceField(
+        help_text="Pulled from your seeded US/CA location catalog.",
+    )
+
     class Meta:
         model = Notifier
         fields = ("keyword", "category", "location", "frequency", "max_pages", "is_active")
@@ -82,3 +92,23 @@ class NotifierForm(BootstrapFormMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self._apply_bootstrap_classes()
         self.fields["is_active"].widget.attrs["class"] = "form-check-input"
+
+        names = list(YellowPagesCategory.objects.order_by("name").values_list("name", flat=True))
+        cat_choices = [("", "— Select category (optional) —")]
+        current_cat = (self.instance.pk and self.instance.category) or ""
+        if current_cat and current_cat not in names:
+            cat_choices.append((current_cat, f"{current_cat} (custom)"))
+        cat_choices.extend((n, n) for n in names)
+        self.fields["category"].choices = cat_choices
+
+        geos = list(
+            YellowPagesLocation.objects.order_by("country", "geo_search").values_list(
+                "geo_search", flat=True
+            )
+        )
+        loc_choices = [("", "— Select location —")]
+        current_loc = (self.instance.pk and self.instance.location) or ""
+        if current_loc and current_loc not in geos:
+            loc_choices.append((current_loc, f"{current_loc} (custom)"))
+        loc_choices.extend((g, g) for g in geos)
+        self.fields["location"].choices = loc_choices

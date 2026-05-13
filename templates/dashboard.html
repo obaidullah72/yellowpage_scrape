@@ -1,36 +1,53 @@
 {% extends "base.html" %}
 {% block title %}Dashboard | LeadHarvester{% endblock %}
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-4">
+<div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-4 pb-1">
     <div>
         <h1 class="h2 mb-1 lh-page-title">Dashboard</h1>
         <p class="lh-page-lead mb-0">Track YellowPages notifiers and scraped leads.</p>
     </div>
-    <a class="btn btn-primary" href="{% url 'notifier_create' %}">Create Notifier</a>
+    <a class="btn btn-primary btn-lg rounded-3 px-4" href="{% url 'notifier_create' %}">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i> Create Notifier
+    </a>
 </div>
 
 <div class="row g-3 mb-4">
     <div class="col-md-4">
-        <div class="card lh-stat-card border-0">
-            <div class="card-body">
-                <p class="text-muted mb-1">Total Notifiers</p>
-                <h2 class="mb-0">{{ total_notifiers }}</h2>
+        <div class="card lh-stat-card border-0 h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="lh-stat-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-bell" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <p class="text-secondary small fw-semibold text-uppercase mb-1" style="letter-spacing: 0.04em;">Total Notifiers</p>
+                    <h2 class="mb-0 display-6">{{ total_notifiers }}</h2>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card lh-stat-card border-0">
-            <div class="card-body">
-                <p class="text-muted mb-1">Businesses Scraped</p>
-                <h2 class="mb-0">{{ total_businesses }}</h2>
+        <div class="card lh-stat-card border-0 h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="lh-stat-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-building" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <p class="text-secondary small fw-semibold text-uppercase mb-1" style="letter-spacing: 0.04em;">Businesses Scraped</p>
+                    <h2 class="mb-0 display-6">{{ total_businesses }}</h2>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card lh-stat-card border-0">
-            <div class="card-body">
-                <p class="text-muted mb-1">Recent Logs</p>
-                <h2 class="mb-0">{{ recent_logs|length }}</h2>
+        <div class="card lh-stat-card border-0 h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="lh-stat-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-clock-history" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <p class="text-secondary small fw-semibold text-uppercase mb-1" style="letter-spacing: 0.04em;">Recent Logs</p>
+                    <h2 class="mb-0 display-6">{{ recent_logs|length }}</h2>
+                </div>
             </div>
         </div>
     </div>
@@ -38,24 +55,31 @@
 
 <div class="row g-4">
     <div class="col-lg-7">
-        <div class="card lh-card border-0">
-            <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
-                <strong>Recent Scraped Results</strong>
-                <a href="{% url 'business_list' %}">View all</a>
+        <div class="card lh-card border-0 shadow-sm">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3 border-0">
+                <span class="lh-card-header-title fw-bold text-body">
+                    <i class="bi bi-table" aria-hidden="true"></i> Recent scraped results
+                </span>
+                <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{% url 'business_list' %}">View all <i class="bi bi-arrow-right-short" aria-hidden="true"></i></a>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead><tr><th>Name</th><th>Category</th><th>Location</th><th>Phone</th></tr></thead>
+            <div class="table-responsive border-top">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light"><tr><th>Name</th><th>Category</th><th>Location</th><th>Phone</th></tr></thead>
                     <tbody>
                     {% for business in recent_businesses %}
                         <tr>
-                            <td><a href="{% url 'business_detail' business.pk %}">{{ business.name }}</a></td>
-                            <td>{{ business.category|default:"-" }}</td>
-                            <td>{{ business.city }} {{ business.state }}</td>
-                            <td>{{ business.phone_number|default:"-" }}</td>
+                            <td class="fw-medium"><a class="text-decoration-none" href="{% url 'business_detail' business.pk %}">{{ business.name }}</a></td>
+                            <td>{{ business.category|default:"—" }}</td>
+                            <td class="text-secondary">{{ business.city }} {{ business.state }}</td>
+                            <td>{{ business.phone_number|default:"—" }}</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="4" class="text-muted text-center py-4">No businesses scraped yet.</td></tr>
+                        <tr><td colspan="4" class="lh-empty text-center text-secondary border-0">
+                            <div class="d-flex flex-column align-items-center gap-2">
+                                <i class="bi bi-inboxes" aria-hidden="true"></i>
+                                <span>No businesses scraped yet. Run a notifier to populate this list.</span>
+                            </div>
+                        </td></tr>
                     {% endfor %}
                     </tbody>
                 </table>
@@ -63,40 +87,50 @@
         </div>
     </div>
     <div class="col-lg-5">
-        <div class="card lh-card border-0 mb-4">
-            <div class="card-header bg-transparent py-3"><strong>Your Notifiers</strong></div>
-            <div class="list-group list-group-flush">
+        <div class="card lh-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent py-3 border-0">
+                <span class="lh-card-header-title fw-bold text-body"><i class="bi bi-sliders" aria-hidden="true"></i> Your notifiers</span>
+            </div>
+            <div class="list-group list-group-flush rounded-bottom-4">
                 {% for notifier in notifiers %}
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <strong>{{ notifier.keyword }}</strong>
-                                <div class="text-muted small">{{ notifier.location }} · {{ notifier.get_frequency_display }} · {{ notifier.business_count }} leads</div>
+                    <div class="list-group-item py-3">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="min-w-0">
+                                <div class="fw-semibold text-truncate"><i class="bi bi-search text-primary me-1" aria-hidden="true"></i>{{ notifier.keyword }}</div>
+                                <div class="text-secondary small text-truncate">{{ notifier.location }} · {{ notifier.get_frequency_display }} · <span class="fw-medium text-body">{{ notifier.business_count }} leads</span></div>
                             </div>
-                            <div class="d-flex gap-2">
-                                <a class="btn btn-sm btn-outline-secondary" href="{% url 'notifier_update' notifier.pk %}">Edit</a>
+                            <div class="d-flex flex-shrink-0 gap-2">
+                                <a class="btn btn-sm btn-outline-secondary rounded-3" href="{% url 'notifier_update' notifier.pk %}"><i class="bi bi-pencil" aria-hidden="true"></i></a>
                                 <form method="post" action="{% url 'notifier_run' notifier.pk %}">
                                     {% csrf_token %}
-                                    <button class="btn btn-sm btn-outline-primary" type="submit">Run</button>
+                                    <button class="btn btn-sm btn-primary rounded-3" type="submit" title="Run now"><i class="bi bi-play-fill" aria-hidden="true"></i></button>
                                 </form>
                             </div>
                         </div>
                     </div>
                 {% empty %}
-                    <div class="list-group-item text-muted">Create a notifier to start scraping.</div>
+                    <div class="list-group-item lh-empty text-secondary text-center">
+                        <i class="bi bi-plus-circle d-block mb-2" aria-hidden="true"></i>
+                        Create a notifier to start scraping.
+                    </div>
                 {% endfor %}
             </div>
         </div>
-        <div class="card lh-card border-0">
-            <div class="card-header bg-transparent py-3"><strong>Latest Scrape Logs</strong></div>
-            <div class="list-group list-group-flush">
+        <div class="card lh-card border-0 shadow-sm">
+            <div class="card-header bg-transparent py-3 border-0">
+                <span class="lh-card-header-title fw-bold text-body"><i class="bi bi-journal-text" aria-hidden="true"></i> Latest scrape logs</span>
+            </div>
+            <div class="list-group list-group-flush rounded-bottom-4">
                 {% for log in recent_logs %}
-                    <div class="list-group-item">
-                        <span class="badge text-bg-{% if log.status == 'success' %}success{% elif log.status == 'error' %}danger{% else %}secondary{% endif %}">{{ log.status }}</span>
-                        <span class="ms-2">{{ log.notifier }} · {{ log.new_businesses }} new</span>
+                    <div class="list-group-item py-3 d-flex align-items-start gap-2">
+                        <span class="badge rounded-pill mt-1 {% if log.status == 'success' %}text-bg-success{% elif log.status == 'error' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ log.status }}</span>
+                        <span class="small">{{ log.notifier }} · <strong>{{ log.new_businesses }}</strong> new</span>
                     </div>
                 {% empty %}
-                    <div class="list-group-item text-muted">No scrape logs yet.</div>
+                    <div class="list-group-item lh-empty text-secondary text-center">
+                        <i class="bi bi-clock d-block mb-2" aria-hidden="true"></i>
+                        No scrape logs yet.
+                    </div>
                 {% endfor %}
             </div>
         </div>
