@@ -1,80 +1,116 @@
 {% extends "base.html" %}
 {% block title %}Notifier | LeadHarvester{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-xl-8 col-lg-9">
-        <div class="card lh-form-card border-0 shadow-sm">
-            <div class="card-body">
-                <header class="mb-4 pb-3 lh-page-header-divider text-center text-md-start">
-                    <div class="d-inline-flex lh-auth-icon mx-auto mx-md-0">
-                        <i class="bi {% if object %}bi-pencil-square{% else %}bi-plus-lg{% endif %}" aria-hidden="true"></i>
-                    </div>
-                    <h1 class="h3 mb-2 lh-page-title">{% if object %}Edit notifier{% else %}Create notifier{% endif %}</h1>
-                    <p class="lh-page-lead mb-0">Define what Yellow Pages should search for, where to look, and how often to run.</p>
-                </header>
-
-                <form method="post" class="lh-notifier-form">
-                    {% csrf_token %}
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger mb-4">{{ form.non_field_errors }}</div>
-                    {% endif %}
-
-                    <section class="lh-form-section" aria-labelledby="section-search">
-                        <h2 class="lh-form-section-title" id="section-search"><i class="bi bi-search" aria-hidden="true"></i> Search criteria</h2>
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label" for="{{ form.keyword.id_for_label }}">{{ form.keyword.label }}</label>
-                                {{ form.keyword }}
-                                {% if form.keyword.help_text %}<div class="form-text">{{ form.keyword.help_text }}</div>{% endif %}
-                                {% for e in form.keyword.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
-                                {{ form.category }}
-                                {% if form.category.help_text %}<div class="form-text">{{ form.category.help_text }}</div>{% endif %}
-                                {% for e in form.category.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
-                                {{ form.location }}
-                                {% if form.location.help_text %}<div class="form-text">{{ form.location.help_text }}</div>{% endif %}
-                                {% for e in form.location.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="lh-form-section" aria-labelledby="section-schedule">
-                        <h2 class="lh-form-section-title" id="section-schedule"><i class="bi bi-calendar-week" aria-hidden="true"></i> Schedule &amp; limits</h2>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label" for="{{ form.frequency.id_for_label }}">{{ form.frequency.label }}</label>
-                                {{ form.frequency }}
-                                {% for e in form.frequency.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="{{ form.max_pages.id_for_label }}">{{ form.max_pages.label }}</label>
-                                {{ form.max_pages }}
-                                {% if form.max_pages.help_text %}<div class="form-text">{{ form.max_pages.help_text }}</div>{% endif %}
-                                {% for e in form.max_pages.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="lh-form-section border-0 pb-0 mb-0" aria-labelledby="section-options">
-                        <h2 class="lh-form-section-title" id="section-options"><i class="bi bi-toggle-on" aria-hidden="true"></i> Options</h2>
-                        <div class="form-check">
-                            {{ form.is_active }}
-                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
-                            {% for e in form.is_active.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
-                        </div>
-                    </section>
-
-                    <div class="lh-form-actions">
-                        <button class="btn btn-primary px-4 rounded-3" type="submit"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>{% if object %}Save changes{% else %}Create notifier{% endif %}</button>
-                        <a class="btn btn-outline-secondary px-4 rounded-3" href="{% url 'dashboard' %}">Cancel</a>
-                    </div>
-                </form>
+<div class="lh-nf-page mx-auto">
+    <div class="lh-nf-shell rounded-4 overflow-hidden shadow">
+        <header class="lh-nf-hero text-white px-4 py-4 px-md-5 py-md-5 position-relative">
+            <div class="position-absolute top-0 end-0 opacity-10 lh-nf-hero-deco" aria-hidden="true">
+                <i class="bi bi-geo-alt"></i>
             </div>
+            <div class="row align-items-center g-3 position-relative">
+                <div class="col-md-8 text-center text-md-start">
+                    <span class="lh-nf-badge d-inline-flex align-items-center gap-2 rounded-pill px-3 py-1 small fw-semibold mb-3">
+                        <i class="bi {% if object %}bi-pencil-square{% else %}bi-lightning-charge-fill{% endif %}" aria-hidden="true"></i>
+                        {% if object %}Edit notifier{% else %}New notifier{% endif %}
+                    </span>
+                    <h1 class="h2 lh-nf-hero-title mb-2">{% if object %}Update your scrape{% else %}Set up a new scrape{% endif %}</h1>
+                    <p class="lh-nf-hero-lead mb-0 text-white-50">Tell LeadHarvester what to look for on Yellow Pages, where, and how often.</p>
+                </div>
+                <div class="col-md-4 d-none d-md-flex justify-content-end">
+                    <div class="lh-nf-hero-icon rounded-4 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-radar" style="font-size: 2.25rem;" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="lh-nf-body bg-white px-3 px-md-5 pb-4 pb-md-5 pt-0">
+            <form method="post" class="lh-notifier-form lh-nf-form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger border-0 shadow-sm mb-4 mt-3 rounded-3">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                {# Keyword — lifted card #}
+                <div class="lh-nf-lift mb-4 mb-md-5">
+                    <div class="lh-nf-field-card shadow-sm rounded-4 p-4 p-md-4 border">
+                        <label class="form-label lh-nf-label mb-2" for="{{ form.keyword.id_for_label }}">
+                            <span class="lh-nf-step text-white rounded-2 me-2">1</span>{{ form.keyword.label }}
+                        </label>
+                        {{ form.keyword }}
+                        <p class="small text-secondary mb-0 mt-2">Use the words a customer would type in Yellow Pages search.</p>
+                        {% for e in form.keyword.errors %}<div class="text-danger small mt-2">{{ e }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                {# Category & location #}
+                <div class="lh-nf-panel rounded-4 p-4 mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom lh-nf-divider">
+                        <span class="lh-nf-step text-white rounded-2">2</span>
+                        <h2 class="h6 mb-0 fw-bold text-body" id="section-search">Catalog match</h2>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label lh-nf-label" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+                            {{ form.category }}
+                            <p class="small text-secondary mb-0 mt-1">Optional — narrows results.</p>
+                            {% for e in form.category.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label lh-nf-label" for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+                            {{ form.location }}
+                            <p class="small text-secondary mb-0 mt-1">From your seeded US &amp; Canada list.</p>
+                            {% for e in form.location.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Schedule #}
+                <div class="lh-nf-panel rounded-4 p-4 mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom lh-nf-divider">
+                        <span class="lh-nf-step text-white rounded-2">3</span>
+                        <h2 class="h6 mb-0 fw-bold text-body" id="section-schedule">Schedule &amp; depth</h2>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label lh-nf-label" for="{{ form.frequency.id_for_label }}">{{ form.frequency.label }}</label>
+                            {{ form.frequency }}
+                            {% for e in form.frequency.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label lh-nf-label" for="{{ form.max_pages.id_for_label }}">{{ form.max_pages.label }}</label>
+                            {{ form.max_pages }}
+                            {% if form.max_pages.help_text %}<p class="small text-secondary mb-0 mt-1">{{ form.max_pages.help_text }}</p>{% endif %}
+                            {% for e in form.max_pages.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Active switch #}
+                <div class="lh-nf-panel lh-nf-panel--muted rounded-4 p-4 mb-0">
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="lh-nf-step text-white rounded-2 flex-shrink-0">4</span>
+                            <div>
+                                <h2 class="h6 mb-1 fw-bold text-body" id="section-options">Run this notifier</h2>
+                                <p class="small text-secondary mb-0">Inactive notifiers stay saved but won’t run on the schedule.</p>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch lh-nf-switch ms-sm-auto">
+                            {{ form.is_active }}
+                            <label class="form-check-label fw-semibold ps-2" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+                        </div>
+                    </div>
+                    {% for e in form.is_active.errors %}<div class="text-danger small mt-2">{{ e }}</div>{% endfor %}
+                </div>
+
+                <div class="lh-nf-footer d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-3 mt-4 pt-4">
+                    <a class="btn btn-lg btn-outline-secondary order-2 order-sm-1 rounded-3 px-4" href="{% url 'dashboard' %}">Cancel</a>
+                    <button class="btn btn-lg lh-nf-submit order-1 order-sm-2 rounded-3 px-5 fw-semibold" type="submit">
+                        <i class="bi bi-check2-circle me-2" aria-hidden="true"></i>{% if object %}Save changes{% else %}Create notifier{% endif %}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

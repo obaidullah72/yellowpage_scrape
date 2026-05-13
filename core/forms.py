@@ -85,13 +85,22 @@ class NotifierForm(BootstrapFormMixin, forms.ModelForm):
         model = Notifier
         fields = ("keyword", "category", "location", "frequency", "max_pages", "is_active")
         widgets = {
+            "keyword": forms.TextInput(
+                attrs={
+                    "placeholder": "e.g. car wash, electricians, pizza…",
+                    "autocomplete": "off",
+                }
+            ),
             "max_pages": forms.NumberInput(attrs={"min": 1, "max": 25}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._apply_bootstrap_classes()
+        kw_classes = self.fields["keyword"].widget.attrs.get("class", "")
+        self.fields["keyword"].widget.attrs["class"] = f"{kw_classes} form-control-lg lh-nf-keyword".strip()
         self.fields["is_active"].widget.attrs["class"] = "form-check-input"
+        self.fields["is_active"].widget.attrs.setdefault("role", "switch")
 
         names = list(YellowPagesCategory.objects.order_by("name").values_list("name", flat=True))
         cat_choices = [("", "— Select category (optional) —")]

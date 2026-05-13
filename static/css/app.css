@@ -339,22 +339,165 @@ body.lh-body {
   max-height: 240px;
 }
 
-.lh-notifier-form .form-check {
-  padding: 1rem 1.1rem;
-  border-radius: var(--bs-border-radius-lg);
-  background: var(--bs-body-bg);
-  border: 1px solid var(--bs-border-color);
+.lh-nf-switch .form-check-input {
+  width: 3rem;
+  height: 1.5rem;
+  margin-top: 0.15rem;
+  cursor: pointer;
 }
 
-.lh-notifier-form .form-check-input {
-  width: 1.15em;
-  height: 1.15em;
-  margin-top: 0.15em;
+.lh-nf-switch .form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+  border-color: var(--bs-primary);
 }
 
-.lh-notifier-form .form-check-label {
-  font-weight: 600;
-  color: var(--lh-navy-800);
+.lh-nf-switch .form-check-label {
+  padding-top: 0.15rem;
+  cursor: pointer;
+}
+
+/* —— Notifier form (dedicated layout) —— */
+.lh-nf-page {
+  max-width: 44rem;
+}
+
+.lh-nf-shell {
+  border: 1px solid rgba(15, 39, 68, 0.12);
+  box-shadow: 0 18px 48px rgba(10, 22, 40, 0.1);
+}
+
+.lh-nf-hero {
+  background: linear-gradient(125deg, #071525 0%, #0f2744 38%, #1e3a5f 72%, #243d5c 100%);
+  overflow: hidden;
+}
+
+.lh-nf-hero-deco {
+  font-size: clamp(6rem, 22vw, 12rem);
+  line-height: 1;
+  transform: translate(12%, -8%);
+  pointer-events: none;
+}
+
+.lh-nf-hero-title {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.lh-nf-hero-lead {
+  font-size: 0.95rem;
+  max-width: 32rem;
+}
+
+.lh-nf-badge {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #f1f5f9;
+}
+
+.lh-nf-hero-icon {
+  width: 5rem;
+  height: 5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.lh-nf-body {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lh-nf-lift {
+  margin-top: -2.35rem;
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 575.98px) {
+  .lh-nf-lift {
+    margin-top: -1.5rem;
+  }
+}
+
+.lh-nf-field-card {
+  background: #fff;
+  border-color: rgba(15, 39, 68, 0.1) !important;
+}
+
+.lh-nf-keyword {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  padding: 0.85rem 1.1rem;
+  border-width: 1.5px;
+}
+
+.lh-nf-keyword:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.22rem rgba(37, 99, 235, 0.2);
+}
+
+.lh-nf-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #475569;
+  font-weight: 700;
+}
+
+.lh-nf-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.65rem;
+  height: 1.65rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: linear-gradient(180deg, #2a4a73, #1e3a5f);
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.lh-nf-panel {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid rgba(15, 39, 68, 0.08);
+}
+
+.lh-nf-panel--muted {
+  background: linear-gradient(180deg, #f1f5f9 0%, #e8edf4 100%);
+}
+
+.lh-nf-divider {
+  border-color: rgba(15, 39, 68, 0.1) !important;
+}
+
+.lh-nf-panel .form-select,
+.lh-nf-panel .form-control {
+  background-color: #fff;
+  border-color: rgba(15, 39, 68, 0.12);
+}
+
+.lh-nf-footer {
+  border-top: 1px solid rgba(15, 39, 68, 0.1);
+}
+
+.lh-nf-submit {
+  background: linear-gradient(180deg, #2a4a73 0%, #1e3a5f 55%, #152a45 100%);
+  color: #fff !important;
+  border: none;
+  box-shadow: 0 8px 24px rgba(30, 58, 95, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.lh-nf-submit:hover {
+  color: #fff !important;
+  filter: brightness(1.05);
+  box-shadow: 0 10px 28px rgba(30, 58, 95, 0.45);
+  transform: translateY(-1px);
+}
+
+.lh-nf-submit:active {
+  transform: translateY(0);
 }
 
 /* Business detail definition lists */
