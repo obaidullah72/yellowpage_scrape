@@ -10,7 +10,7 @@ from urllib.parse import urlencode
 from django.views import View
 from django.views.generic import CreateView, DetailView, FormView, ListView, TemplateView, UpdateView
 
-from .forms import NotifierForm, ProfileForm, RegisterForm
+from .forms import EmailOrUsernameAuthenticationForm, NotifierForm, ProfileForm, RegisterForm
 from .models import Business, Notifier, ScrapeLog
 from .scraper import run_notifier_scrape
 from .services import business_export_queryset, ensure_profile, export_businesses, next_run_for_frequency
@@ -30,6 +30,7 @@ class RegisterView(CreateView):
 
 class AppLoginView(LoginView):
     template_name = "login.html"
+    authentication_form = EmailOrUsernameAuthenticationForm
 
 
 class AppLogoutView(LogoutView):
