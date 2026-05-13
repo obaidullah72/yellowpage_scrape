@@ -1,35 +1,46 @@
 {% extends "base.html" %}
 {% block title %}Register | LeadHarvester{% endblock %}
 {% block content %}
-<div class="row justify-content-center py-4 py-md-5">
-    <div class="col-md-7 col-lg-6 col-xl-5">
-        <div class="card lh-auth-card border-0">
-            <div class="card-body p-4 p-md-5">
-                <div class="text-center mb-4">
-                    <div class="lh-auth-icon mx-auto">
-                        <i class="bi bi-person-plus" aria-hidden="true"></i>
-                    </div>
-                    <h1 class="h4 mb-1 lh-page-title">Create account</h1>
-                    <p class="lh-page-lead small mb-0">Set up your profile to run YellowPages notifiers.</p>
+<div class="lh-nf-page lh-nf-page--lg mx-auto py-4 py-md-5">
+    <div class="lh-nf-shell rounded-4 overflow-hidden shadow">
+        <header class="lh-nf-hero text-white px-4 py-4 px-md-5 py-md-4 position-relative">
+            <div class="position-absolute top-0 end-0 opacity-10 lh-nf-hero-deco" aria-hidden="true"><i class="bi bi-person-plus"></i></div>
+            <div class="row align-items-center g-3 position-relative">
+                <div class="col-md-8 text-center text-md-start">
+                    <span class="lh-nf-badge d-inline-flex align-items-center gap-2 rounded-pill px-3 py-1 small fw-semibold mb-3">
+                        <i class="bi bi-person-plus" aria-hidden="true"></i> Join
+                    </span>
+                    <h1 class="h2 lh-nf-hero-title mb-2">Create your account</h1>
+                    <p class="lh-nf-hero-lead mb-0 text-white-50">Set up your profile to run Yellow Pages notifiers and collect leads in one place.</p>
                 </div>
-                <form method="post" class="vstack gap-3">
-                    {% csrf_token %}
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
-                    {% endif %}
-                    {% for field in form %}
-                        <div>
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-                            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                        </div>
-                    {% endfor %}
-                    <button class="btn btn-primary btn-lg w-100 rounded-3 mt-2" type="submit">
-                        <i class="bi bi-check2-circle me-1" aria-hidden="true"></i> Register
-                    </button>
-                </form>
+                <div class="col-md-4 d-none d-md-flex justify-content-end">
+                    <div class="lh-nf-hero-icon rounded-4 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-people" style="font-size: 2.25rem;" aria-hidden="true"></i>
+                    </div>
+                </div>
             </div>
+        </header>
+        <div class="lh-nf-body bg-white px-3 px-md-5 pb-4 pb-md-5 pt-4">
+            <form method="post" class="vstack gap-3">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger border-0 shadow-sm rounded-3 small">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in form %}
+                    <div>
+                        <label class="form-label lh-nf-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                        {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                {% endfor %}
+                <div class="lh-nf-footer d-flex flex-column flex-sm-row gap-2 mt-2 pt-4 mb-0 border-0">
+                    <a class="btn btn-lg btn-outline-secondary order-2 order-sm-1 rounded-3 px-4" href="{% url 'login' %}">Cancel</a>
+                    <button class="btn btn-lg lh-nf-submit order-1 order-sm-2 rounded-3 px-5 ms-sm-auto" type="submit">
+                        <i class="bi bi-check2-circle me-2" aria-hidden="true"></i> Register
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

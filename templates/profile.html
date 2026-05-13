@@ -1,31 +1,41 @@
 {% extends "base.html" %}
 {% block title %}Profile | LeadHarvester{% endblock %}
 {% block content %}
-<div class="row justify-content-center py-2">
-    <div class="col-lg-7 col-xl-6">
-        <div class="card lh-form-card border-0">
-            <div class="card-body">
-                <header class="mb-4 pb-3 lh-page-header-divider text-center text-md-start">
-                    <div class="d-inline-flex align-items-center justify-content-center lh-auth-icon mx-auto mx-md-0">
-                        <i class="bi bi-person-badge" aria-hidden="true"></i>
+<div class="lh-nf-page lh-nf-page--md mx-auto py-4 py-md-5">
+    <div class="lh-nf-shell rounded-4 overflow-hidden shadow">
+        <header class="lh-nf-hero text-white px-4 py-4 px-md-5 py-md-4 position-relative">
+            <div class="position-absolute top-0 end-0 opacity-10 lh-nf-hero-deco" aria-hidden="true"><i class="bi bi-person-badge"></i></div>
+            <div class="row align-items-center g-3 position-relative">
+                <div class="col-md-8 text-center text-md-start">
+                    <span class="lh-nf-badge d-inline-flex align-items-center gap-2 rounded-pill px-3 py-1 small fw-semibold mb-3">
+                        <i class="bi bi-gear" aria-hidden="true"></i> Settings
+                    </span>
+                    <h1 class="h2 lh-nf-hero-title mb-2">Your profile</h1>
+                    <p class="lh-nf-hero-lead mb-0 text-white-50">Account details and notification preferences.</p>
+                </div>
+                <div class="col-md-4 d-none d-md-flex justify-content-end">
+                    <div class="lh-nf-hero-icon rounded-4 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-person-circle" style="font-size: 2.25rem;" aria-hidden="true"></i>
                     </div>
-                    <h1 class="h3 mb-2 lh-page-title">Your profile</h1>
-                    <p class="lh-page-lead small mb-0">Account details and notification preferences.</p>
-                </header>
-                <form method="post" class="vstack gap-3">
-                    {% csrf_token %}
-                    {% for field in form %}
-                        <div>
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                        </div>
-                    {% endfor %}
-                    <div class="d-flex flex-wrap gap-2 pt-3 border-top mt-2">
-                        <button class="btn btn-primary rounded-3 px-4" type="submit"><i class="bi bi-check2 me-1" aria-hidden="true"></i> Save profile</button>
-                    </div>
-                </form>
+                </div>
             </div>
+        </header>
+        <div class="lh-nf-body bg-white px-3 px-md-5 pb-4 pb-md-5 pt-4">
+            <form method="post" class="vstack gap-3">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div>
+                        <label class="form-label lh-nf-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                {% endfor %}
+                <div class="lh-nf-footer d-flex flex-wrap gap-2 mt-2 pt-4 mb-0 border-0">
+                    <button class="btn btn-lg lh-nf-submit rounded-3 px-5" type="submit">
+                        <i class="bi bi-check2-circle me-2" aria-hidden="true"></i> Save profile
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

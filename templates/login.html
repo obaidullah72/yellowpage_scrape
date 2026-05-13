@@ -1,40 +1,45 @@
 {% extends "base.html" %}
 {% block title %}Login | LeadHarvester{% endblock %}
 {% block content %}
-<div class="lh-auth-shell py-4 py-md-5">
-    <div class="card lh-auth-card border-0">
-        <div class="card-body">
-            <div class="text-center mb-4">
-                <div class="lh-auth-icon mx-auto">
-                    <i class="bi bi-shield-lock" aria-hidden="true"></i>
+<div class="lh-nf-page lh-nf-page--narrow mx-auto py-4 py-md-5">
+    <div class="lh-nf-shell rounded-4 overflow-hidden shadow">
+        <header class="lh-nf-hero text-white px-4 py-4 px-md-5 py-md-4 position-relative">
+            <div class="position-absolute top-0 end-0 opacity-10 lh-nf-hero-deco" aria-hidden="true"><i class="bi bi-shield-lock"></i></div>
+            <div class="row align-items-center g-3 position-relative">
+                <div class="col text-center text-md-start">
+                    <span class="lh-nf-badge d-inline-flex align-items-center gap-2 rounded-pill px-3 py-1 small fw-semibold mb-3">
+                        <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Account
+                    </span>
+                    <h1 class="h2 lh-nf-hero-title mb-2">Welcome back</h1>
+                    <p class="lh-nf-hero-lead mb-0 text-white-50">Sign in to manage notifiers and browse scraped leads.</p>
                 </div>
-                <h1 class="h4 mb-1 lh-page-title">Welcome back</h1>
-                <p class="lh-page-lead small mb-0">Sign in to manage notifiers and leads.</p>
             </div>
+        </header>
+        <div class="lh-nf-body bg-white px-3 px-md-5 pb-4 pb-md-5 pt-4">
             <form method="post" class="vstack gap-3">
                 {% csrf_token %}
                 {% if form.non_field_errors %}
-                    <div class="alert alert-danger small mb-0">{{ form.non_field_errors }}</div>
+                    <div class="alert alert-danger border-0 shadow-sm rounded-3 small mb-0">{{ form.non_field_errors }}</div>
                 {% endif %}
                 <div>
-                    <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
-                    <div class="input-group">
+                    <label class="form-label lh-nf-label" for="{{ form.username.id_for_label }}">Username</label>
+                    <div class="input-group shadow-sm rounded-3 overflow-hidden">
                         <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-person" aria-hidden="true"></i></span>
                         <input class="form-control border-start-0 ps-0" type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" placeholder="Your username" required>
                     </div>
                 </div>
                 <div>
-                    <label class="form-label" for="{{ form.password.id_for_label }}">Password</label>
-                    <div class="input-group">
+                    <label class="form-label lh-nf-label" for="{{ form.password.id_for_label }}">Password</label>
+                    <div class="input-group shadow-sm rounded-3 overflow-hidden">
                         <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-key" aria-hidden="true"></i></span>
                         <input class="form-control border-start-0 ps-0" type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" placeholder="••••••••" required>
                     </div>
                 </div>
-                <button class="btn btn-primary btn-lg w-100 rounded-3 mt-2" type="submit">
-                    <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Sign in
+                <button class="btn btn-lg lh-nf-submit w-100 rounded-3 mt-2" type="submit">
+                    <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i> Sign in
                 </button>
             </form>
-            <p class="text-center text-secondary small mt-4 mb-0">New here? <a href="{% url 'register' %}">Create an account</a></p>
+            <p class="text-center text-secondary small mt-4 mb-0 pt-3 border-top lh-nf-divider">New here? <a href="{% url 'register' %}">Create an account</a></p>
         </div>
     </div>
 </div>

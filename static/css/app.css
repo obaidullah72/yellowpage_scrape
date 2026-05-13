@@ -361,6 +361,26 @@ body.lh-body {
   max-width: 44rem;
 }
 
+.lh-nf-page--narrow {
+  max-width: 26rem;
+}
+
+.lh-nf-page--md {
+  max-width: 42rem;
+}
+
+.lh-nf-page--lg {
+  max-width: 52rem;
+}
+
+.lh-nf-page--xl {
+  max-width: 72rem;
+}
+
+.lh-nf-page--fluid {
+  max-width: 100%;
+}
+
 .lh-nf-shell {
   border: 1px solid rgba(15, 39, 68, 0.12);
   box-shadow: 0 18px 48px rgba(10, 22, 40, 0.1);
@@ -396,12 +416,19 @@ body.lh-body {
   color: #f1f5f9;
 }
 
-.lh-nf-hero-icon {
-  width: 5rem;
-  height: 5rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.95);
+.lh-nf-hero .btn-light {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.lh-nf-hero .btn-outline-light {
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #f8fafc;
+}
+
+.lh-nf-hero .btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #fff;
+  color: #fff;
 }
 
 .lh-nf-body {

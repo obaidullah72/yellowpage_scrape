@@ -1,80 +1,100 @@
 {% extends "base.html" %}
 {% block title %}{{ business.name }} | LeadHarvester{% endblock %}
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-start gap-3 mb-4">
-    <div class="min-w-0">
-        <h1 class="h2 mb-1 lh-page-title text-break">{{ business.name }}</h1>
-        <p class="lh-page-lead mb-0">
-            <i class="bi bi-tag text-primary me-1" aria-hidden="true"></i>{{ business.category|default:"Uncategorized" }}{% if business.sub_category %} · {{ business.sub_category }}{% endif %}
-        </p>
-    </div>
-    <a class="btn btn-outline-secondary rounded-3" href="{% url 'business_list' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Back</a>
-</div>
+<div class="lh-nf-page lh-nf-page--xl mx-auto py-3 py-md-4">
+    <div class="lh-nf-shell rounded-4 overflow-hidden shadow">
+        <header class="lh-nf-hero text-white px-4 py-4 px-md-5 py-md-4 position-relative">
+            <div class="position-absolute top-0 end-0 opacity-10 lh-nf-hero-deco" aria-hidden="true"><i class="bi bi-shop"></i></div>
+            <div class="row align-items-start g-3 position-relative">
+                <div class="col-lg-9 text-center text-lg-start min-w-0">
+                    <span class="lh-nf-badge d-inline-flex align-items-center gap-2 rounded-pill px-3 py-1 small fw-semibold mb-3">
+                        <i class="bi bi-pin-map" aria-hidden="true"></i> Lead detail
+                    </span>
+                    <h1 class="h2 lh-nf-hero-title mb-2 text-break">{{ business.name }}</h1>
+                    <p class="lh-nf-hero-lead mb-0 text-white-50">
+                        <i class="bi bi-tag me-1" aria-hidden="true"></i>{{ business.category|default:"Uncategorized" }}{% if business.sub_category %} · {{ business.sub_category }}{% endif %}
+                    </p>
+                </div>
+                <div class="col-lg-3 text-center text-lg-end">
+                    <a class="btn btn-outline-light rounded-3 px-3" href="{% url 'business_list' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Back to list</a>
+                </div>
+            </div>
+        </header>
 
-<div class="row g-4">
-    <div class="col-lg-8">
-        <div class="card lh-card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <h2 class="h5 lh-card-header-title mb-3"><i class="bi bi-telephone" aria-hidden="true"></i> Contact</h2>
-                <dl class="row mb-0 lh-dl g-3">
-                    <dt class="col-sm-3">Phone</dt><dd class="col-sm-9">{{ business.phone_number|default:"—" }}</dd>
-                    <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ business.email|default:"—" }}</dd>
-                    <dt class="col-sm-3">Website</dt><dd class="col-sm-9">{% if business.website %}<a href="{{ business.website }}" target="_blank" rel="noopener">{{ business.website }}</a>{% else %}—{% endif %}</dd>
-                    <dt class="col-sm-3">YellowPages</dt><dd class="col-sm-9 text-break"><a href="{{ business.yellowpages_url }}" target="_blank" rel="noopener">{{ business.yellowpages_url }}</a></dd>
-                </dl>
-            </div>
-        </div>
-        <div class="card lh-card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <h2 class="h5 lh-card-header-title mb-3"><i class="bi bi-geo-alt" aria-hidden="true"></i> Address</h2>
-                <p class="mb-3">{{ business.full_address|default:"—" }}</p>
-                <a class="btn btn-primary btn-sm rounded-3" href="{{ business.google_maps_url }}" target="_blank" rel="noopener"><i class="bi bi-map me-1" aria-hidden="true"></i> Open in Google Maps</a>
-            </div>
-        </div>
-        <div class="card lh-card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h2 class="h5 lh-card-header-title mb-3"><i class="bi bi-text-left" aria-hidden="true"></i> Description</h2>
-                <p class="mb-0 text-secondary">{{ business.description|default:"No description found." }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4">
-        {% if business.logo_image %}
-            <div class="card border-0 shadow-sm mb-4 overflow-hidden rounded-4">
-                <img class="img-fluid w-100" style="max-height: 220px; object-fit: contain; background: var(--bs-body-bg);" src="{{ business.logo_image }}" alt="{{ business.name }}">
-            </div>
-        {% endif %}
-        <div class="card lh-card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <h2 class="h5 lh-card-header-title mb-3"><i class="bi bi-star" aria-hidden="true"></i> Ratings</h2>
-                <p class="mb-1">Rating: <strong>{{ business.rating|default:"—" }}</strong></p>
-                <p class="mb-0 text-secondary">Reviews: {{ business.review_count|default:"—" }}</p>
-            </div>
-        </div>
-        <div class="card lh-card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <h2 class="h5 lh-card-header-title mb-3"><i class="bi bi-clock" aria-hidden="true"></i> Working hours</h2>
-                {% if business.working_hours %}
-                    <ul class="list-unstyled mb-0 small">
-                        {% for day, hours in business.working_hours.items %}
-                            <li class="d-flex justify-content-between border-bottom py-2"><span class="fw-medium">{{ day }}</span><span class="text-secondary">{{ hours }}</span></li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted mb-0 small">No hours found.</p>
-                {% endif %}
-            </div>
-        </div>
-        <div class="card lh-card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h2 class="h5 lh-card-header-title mb-3"><i class="bi bi-share" aria-hidden="true"></i> Social</h2>
-                {% if business.social_media_links %}
-                    {% for link in business.social_media_links %}
-                        <a class="d-block text-truncate small mb-2" href="{{ link }}" target="_blank" rel="noopener">{{ link }}</a>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-muted mb-0 small">No social links found.</p>
-                {% endif %}
+        <div class="lh-nf-body bg-white px-3 px-md-4 px-lg-5 pb-4 pb-md-5 pt-4">
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="lh-nf-panel rounded-4 p-4 mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom lh-nf-divider">
+                            <span class="lh-nf-step text-white rounded-2">1</span>
+                            <h2 class="h6 mb-0 fw-bold text-body"><i class="bi bi-telephone text-primary me-1" aria-hidden="true"></i> Contact</h2>
+                        </div>
+                        <dl class="row mb-0 lh-dl g-3">
+                            <dt class="col-sm-3">Phone</dt><dd class="col-sm-9">{{ business.phone_number|default:"—" }}</dd>
+                            <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ business.email|default:"—" }}</dd>
+                            <dt class="col-sm-3">Website</dt><dd class="col-sm-9">{% if business.website %}<a href="{{ business.website }}" target="_blank" rel="noopener">{{ business.website }}</a>{% else %}—{% endif %}</dd>
+                            <dt class="col-sm-3">YellowPages</dt><dd class="col-sm-9 text-break"><a href="{{ business.yellowpages_url }}" target="_blank" rel="noopener">{{ business.yellowpages_url }}</a></dd>
+                        </dl>
+                    </div>
+                    <div class="lh-nf-panel rounded-4 p-4 mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom lh-nf-divider">
+                            <span class="lh-nf-step text-white rounded-2">2</span>
+                            <h2 class="h6 mb-0 fw-bold text-body"><i class="bi bi-geo-alt text-primary me-1" aria-hidden="true"></i> Address</h2>
+                        </div>
+                        <p class="mb-3">{{ business.full_address|default:"—" }}</p>
+                        <a class="btn btn-sm lh-nf-submit rounded-3" href="{{ business.google_maps_url }}" target="_blank" rel="noopener"><i class="bi bi-map me-1" aria-hidden="true"></i> Open in Google Maps</a>
+                    </div>
+                    <div class="lh-nf-panel rounded-4 p-4 mb-0">
+                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom lh-nf-divider">
+                            <span class="lh-nf-step text-white rounded-2">3</span>
+                            <h2 class="h6 mb-0 fw-bold text-body"><i class="bi bi-text-left text-primary me-1" aria-hidden="true"></i> Description</h2>
+                        </div>
+                        <p class="mb-0 text-secondary">{{ business.description|default:"No description found." }}</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    {% if business.logo_image %}
+                        <div class="lh-nf-panel rounded-4 p-2 mb-4 overflow-hidden text-center bg-white">
+                            <img class="img-fluid rounded-3" style="max-height: 220px; object-fit: contain;" src="{{ business.logo_image }}" alt="{{ business.name }}">
+                        </div>
+                    {% endif %}
+                    <div class="lh-nf-panel rounded-4 p-4 mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom lh-nf-divider">
+                            <span class="lh-nf-step text-white rounded-2">4</span>
+                            <h2 class="h6 mb-0 fw-bold text-body"><i class="bi bi-star text-primary me-1" aria-hidden="true"></i> Ratings</h2>
+                        </div>
+                        <p class="mb-1">Rating: <strong>{{ business.rating|default:"—" }}</strong></p>
+                        <p class="mb-0 text-secondary small">Reviews: {{ business.review_count|default:"—" }}</p>
+                    </div>
+                    <div class="lh-nf-panel rounded-4 p-4 mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom lh-nf-divider">
+                            <span class="lh-nf-step text-white rounded-2">5</span>
+                            <h2 class="h6 mb-0 fw-bold text-body"><i class="bi bi-clock text-primary me-1" aria-hidden="true"></i> Hours</h2>
+                        </div>
+                        {% if business.working_hours %}
+                            <ul class="list-unstyled mb-0 small">
+                                {% for day, hours in business.working_hours.items %}
+                                    <li class="d-flex justify-content-between border-bottom py-2 lh-nf-divider"><span class="fw-medium">{{ day }}</span><span class="text-secondary">{{ hours }}</span></li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mb-0 small">No hours found.</p>
+                        {% endif %}
+                    </div>
+                    <div class="lh-nf-panel lh-nf-panel--muted rounded-4 p-4 mb-0">
+                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom lh-nf-divider">
+                            <span class="lh-nf-step text-white rounded-2">6</span>
+                            <h2 class="h6 mb-0 fw-bold text-body"><i class="bi bi-share text-primary me-1" aria-hidden="true"></i> Social</h2>
+                        </div>
+                        {% if business.social_media_links %}
+                            {% for link in business.social_media_links %}
+                                <a class="d-block text-truncate small mb-2" href="{{ link }}" target="_blank" rel="noopener">{{ link }}</a>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted mb-0 small">No social links found.</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
