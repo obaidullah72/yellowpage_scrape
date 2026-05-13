@@ -1,6 +1,19 @@
 from django.contrib import admin
 
-from .models import Business, Notifier, ScrapeLog, UserProfile
+from .models import Business, Notifier, ScrapeLog, UserProfile, YellowPagesCategory, YellowPagesLocation
+
+
+@admin.register(YellowPagesCategory)
+class YellowPagesCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+
+@admin.register(YellowPagesLocation)
+class YellowPagesLocationAdmin(admin.ModelAdmin):
+    list_display = ("geo_search", "country", "region_code")
+    list_filter = ("country", "region_code")
+    search_fields = ("geo_search", "region_code")
 
 
 @admin.register(UserProfile)

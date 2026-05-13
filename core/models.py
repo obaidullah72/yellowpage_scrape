@@ -128,3 +128,42 @@ class ScrapeLog(models.Model):
 
     def __str__(self):
         return f"{self.get_status_display()} scrape at {self.started_at:%Y-%m-%d %H:%M}"
+
+
+class YellowPagesCategory(models.Model):
+    """Common Yellow Pages–style business categories (US & Canada)."""
+
+    name = models.CharField(max_length=120, unique=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self):
+        return self.name
+
+
+class YellowPagesLocation(models.Model):
+    """Geographic search strings suitable for YellowPages.com ``geo_location_terms`` (US & CA)."""
+
+    class Country(models.TextChoices):
+        US = "us", "United States"
+        CA = "ca", "Canada"
+
+    country = models.CharField(max_length=2, choices=Country.choices)
+    geo_search = models.CharField(max_length=180)
+    region_code = models.CharField(max_length=8, blank=True)
+
+    class Meta:
+        ordering = ("country", "geo_search")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("country", "geo_search"),
+                name="uniq_yp_location_country_geo",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["country", "geo_search"]),
+        ]
+
+    def __str__(self):
+        return self.geo_search

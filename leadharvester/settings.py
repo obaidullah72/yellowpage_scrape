@@ -25,6 +25,8 @@ ALLOWED_HOSTS = [host.strip() for host in os.getenv("ALLOWED_HOSTS", "localhost,
 # Application definition
 
 INSTALLED_APPS = [
+    # ``core`` first so project management commands (e.g. createsuperuser) override Django's.
+    "core",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -32,7 +34,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_apscheduler",
-    "core",
 ]
 
 MIDDLEWARE = [

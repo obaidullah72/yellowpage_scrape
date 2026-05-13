@@ -2,10 +2,11 @@
 {% block title %}Register | LeadHarvester{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="h4 mb-3">Create Account</h1>
+    <div class="col-md-6 col-lg-5">
+        <div class="card lh-card lh-auth-card border-0">
+            <div class="card-body">
+                <h1 class="h4 mb-1 lh-page-title">Create account</h1>
+                <p class="lh-page-lead small mb-4">Set up your profile to run YellowPages notifiers.</p>
                 <form method="post">
                     {% csrf_token %}
                     {{ form.non_field_errors }}

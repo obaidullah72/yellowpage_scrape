@@ -1,0 +1,219 @@
+/* LeadHarvester — layout & theme (Bootstrap-compatible) */
+:root {
+  --lh-bg: #f4f1eb;
+  --lh-surface: #fffcf7;
+  --lh-surface-2: #fff;
+  --lh-text: #1c2424;
+  --lh-muted: #5c6868;
+  --lh-primary: #0d5c4d;
+  --lh-primary-hover: #094a3e;
+  --lh-accent: #c25621;
+  --lh-accent-soft: rgba(194, 86, 33, 0.12);
+  --lh-border: rgba(28, 36, 36, 0.1);
+  --lh-shadow: 0 12px 40px rgba(28, 36, 36, 0.08);
+  --lh-radius: 14px;
+  --lh-font: "DM Sans", system-ui, sans-serif;
+  --lh-display: "Fraunces", Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body.lh-body {
+  font-family: var(--lh-font);
+  color: var(--lh-text);
+  background-color: var(--lh-bg);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 100% -20%, rgba(13, 92, 77, 0.09), transparent),
+    radial-gradient(ellipse 80% 60% at 0% 100%, rgba(194, 86, 33, 0.07), transparent);
+  min-height: 100vh;
+}
+
+.lh-navbar {
+  background: linear-gradient(135deg, #0a3f36 0%, #0d5c4d 45%, #126b5a 100%) !important;
+  box-shadow: 0 4px 24px rgba(10, 63, 54, 0.35);
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+
+.lh-navbar .navbar-brand {
+  font-family: var(--lh-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 1.35rem;
+}
+
+.lh-navbar .nav-link {
+  font-weight: 500;
+  opacity: 0.92;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem !important;
+  margin: 0 0.1rem;
+}
+
+.lh-navbar .nav-link:hover,
+.lh-navbar .nav-link:focus {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.lh-navbar .btn-outline-light {
+  border-radius: 10px;
+  font-weight: 500;
+  padding: 0.35rem 0.9rem;
+}
+
+.lh-main {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+.lh-page-title {
+  font-family: var(--lh-display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--lh-text);
+}
+
+.lh-page-lead {
+  color: var(--lh-muted);
+  font-size: 1rem;
+}
+
+.lh-card {
+  border: 1px solid var(--lh-border);
+  border-radius: var(--lh-radius);
+  background: var(--lh-surface);
+  box-shadow: var(--lh-shadow);
+}
+
+.lh-card .card-header {
+  border-bottom-color: var(--lh-border);
+  font-weight: 600;
+  border-radius: var(--lh-radius) var(--lh-radius) 0 0 !important;
+}
+
+.lh-stat-card {
+  border-radius: var(--lh-radius);
+  border: 1px solid var(--lh-border);
+  background: var(--lh-surface-2);
+  box-shadow: var(--lh-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.lh-stat-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--lh-primary), #1a8a75);
+  border-radius: 4px 0 0 4px;
+}
+
+.lh-stat-card .card-body {
+  padding-left: 1.35rem;
+}
+
+.lh-stat-card h2 {
+  font-family: var(--lh-display);
+  font-weight: 600;
+  color: var(--lh-primary);
+}
+
+.btn-primary {
+  background-color: var(--lh-primary);
+  border-color: var(--lh-primary);
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.5rem 1.1rem;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--lh-primary-hover);
+  border-color: var(--lh-primary-hover);
+}
+
+.btn-outline-secondary {
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.form-control,
+.form-select {
+  border-radius: 10px;
+  border-color: rgba(28, 36, 36, 0.15);
+}
+
+.form-control:focus {
+  border-color: var(--lh-primary);
+  box-shadow: 0 0 0 0.2rem rgba(13, 92, 77, 0.15);
+}
+
+.table {
+  --bs-table-hover-bg: rgba(13, 92, 77, 0.04);
+}
+
+.table thead th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--lh-muted);
+  border-bottom-width: 1px;
+}
+
+.pagination .page-link {
+  border-radius: 8px;
+  margin: 0 2px;
+  border: 1px solid var(--lh-border);
+}
+
+.list-group-item {
+  border-color: var(--lh-border);
+}
+
+a {
+  color: var(--lh-primary);
+}
+
+a:hover {
+  color: var(--lh-accent);
+}
+
+.alert {
+  border-radius: 12px;
+  border: none;
+}
+
+.alert-success {
+  background: rgba(13, 92, 77, 0.12);
+  color: #0a3f36;
+}
+
+.alert-danger {
+  background: rgba(185, 48, 48, 0.1);
+  color: #7a1f1f;
+}
+
+.alert-info {
+  background: rgba(13, 92, 77, 0.08);
+  color: var(--lh-text);
+}
+
+.lh-auth-card .card-body {
+  padding: 2rem 2.25rem;
+}
+
+.lh-auth-card h1 {
+  font-family: var(--lh-display);
+  font-weight: 600;
+}
+
+.lh-badge-soft {
+  font-weight: 600;
+}

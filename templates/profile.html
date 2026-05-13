@@ -3,9 +3,10 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-7">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="h4 mb-3">Profile</h1>
+        <div class="card lh-card border-0">
+            <div class="card-body p-4 p-md-5">
+                <h1 class="h4 mb-1 lh-page-title">Your profile</h1>
+                <p class="lh-page-lead small mb-4">Account details and notification preferences.</p>
                 <form method="post">
                     {% csrf_token %}
                     {% for field in form %}

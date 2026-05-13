@@ -1,0 +1,214 @@
+"""
+Interactive superuser creation with username, email, password, first name, last name.
+
+Overrides django.contrib.auth's command. ``core`` must be listed first in
+``INSTALLED_APPS`` so this command overrides Django's (first app wins for duplicate names).
+"""
+
+import getpass
+import os
+import sys
+
+from django.contrib.auth.management import get_default_username
+from django.contrib.auth.management.commands.createsuperuser import (
+    PASSWORD_FIELD,
+    Command as AuthCreateSuperuserCommand,
+    NotRunningInTTYException,
+)
+from django.contrib.auth.password_validation import validate_password
+from django.core import exceptions
+from django.core.management.base import CommandError
+from django.utils.text import capfirst
+
+
+class Command(AuthCreateSuperuserCommand):
+    help = "Create a superuser (prompts for username, email, password, first name, last name)."
+
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument(
+            "--first_name",
+            default=None,
+            help="Specifies the first name for the superuser.",
+        )
+        parser.add_argument(
+            "--last_name",
+            default=None,
+            help="Specifies the last name for the superuser.",
+        )
+
+    def handle(self, *args, **options):
+        username = options[self.UserModel.USERNAME_FIELD]
+        database = options["database"]
+        user_data = {}
+        verbose_field_name = self.username_field.verbose_name
+        try:
+            self.UserModel._meta.get_field(PASSWORD_FIELD)
+        except exceptions.FieldDoesNotExist:
+            pass
+        else:
+            user_data[PASSWORD_FIELD] = None
+
+        try:
+            if options["interactive"]:
+                fake_user_data = {}
+                if hasattr(self.stdin, "isatty") and not self.stdin.isatty():
+                    raise NotRunningInTTYException
+                default_username = get_default_username(database=database)
+                if username:
+                    error_msg = self._validate_username(
+                        username, verbose_field_name, database
+                    )
+                    if error_msg:
+                        self.stderr.write(error_msg)
+                        username = None
+                elif username == "":
+                    raise CommandError(
+                        "%s cannot be blank." % capfirst(verbose_field_name)
+                    )
+                while username is None:
+                    message = self._get_input_message(
+                        self.username_field, default_username
+                    )
+                    username = self.get_input_data(
+                        self.username_field, message, default_username
+                    )
+                    if username:
+                        error_msg = self._validate_username(
+                            username, verbose_field_name, database
+                        )
+                        if error_msg:
+                            self.stderr.write(error_msg)
+                            username = None
+                            continue
+                user_data[self.UserModel.USERNAME_FIELD] = username
+                fake_user_data[self.UserModel.USERNAME_FIELD] = (
+                    self.username_field.remote_field.model(username)
+                    if self.username_field.remote_field
+                    else username
+                )
+
+                # Email (prompt here so order is username → email → password → names)
+                email_field = self.UserModel._meta.get_field("email")
+                user_data["email"] = options.get("email")
+                if user_data["email"] is not None:
+                    user_data["email"] = email_field.clean(user_data["email"], None)
+                while user_data["email"] is None:
+                    message = self._get_input_message(email_field)
+                    input_value = self.get_input_data(email_field, message)
+                    user_data["email"] = input_value
+                fake_user_data["email"] = user_data["email"]
+
+                # Password
+                while PASSWORD_FIELD in user_data and user_data[PASSWORD_FIELD] is None:
+                    password = getpass.getpass()
+                    password2 = getpass.getpass("Password (again): ")
+                    if password != password2:
+                        self.stderr.write("Error: Your passwords didn't match.")
+                        continue
+                    if password.strip() == "":
+                        self.stderr.write("Error: Blank passwords aren't allowed.")
+                        continue
+                    try:
+                        validate_password(password2, self.UserModel(**fake_user_data))
+                    except exceptions.ValidationError as err:
+                        self.stderr.write("\n".join(err.messages))
+                        response = input(
+                            "Bypass password validation and create user anyway? [y/N]: "
+                        )
+                        if response.lower() != "y":
+                            continue
+                    user_data[PASSWORD_FIELD] = password
+
+                # First / last name
+                for name in ("first_name", "last_name"):
+                    field = self.UserModel._meta.get_field(name)
+                    user_data[name] = options.get(name)
+                    if user_data[name] is not None:
+                        user_data[name] = field.clean(user_data[name], None)
+                    while user_data[name] is None:
+                        message = self._get_input_message(field)
+                        user_data[name] = self.get_input_data(field, message)
+                    fake_user_data[name] = user_data[name]
+
+                self.UserModel._default_manager.db_manager(database).create_superuser(
+                    **user_data
+                )
+                if options["verbosity"] >= 1:
+                    self.stdout.write("Superuser created successfully.")
+            else:
+                if (
+                    PASSWORD_FIELD in user_data
+                    and "DJANGO_SUPERUSER_PASSWORD" in os.environ
+                ):
+                    user_data[PASSWORD_FIELD] = os.environ["DJANGO_SUPERUSER_PASSWORD"]
+                if username is None:
+                    username = os.environ.get(
+                        "DJANGO_SUPERUSER_" + self.UserModel.USERNAME_FIELD.upper()
+                    )
+                if username is None:
+                    raise CommandError(
+                        "You must use --%s with --noinput."
+                        % self.UserModel.USERNAME_FIELD
+                    )
+                error_msg = self._validate_username(
+                    username, verbose_field_name, database
+                )
+                if error_msg:
+                    raise CommandError(error_msg)
+
+                user_data[self.UserModel.USERNAME_FIELD] = username
+                for field_name in self.UserModel.REQUIRED_FIELDS:
+                    if field_name == "email":
+                        continue
+                    env_var = "DJANGO_SUPERUSER_" + field_name.upper()
+                    value = options[field_name] or os.environ.get(env_var)
+                    field = self.UserModel._meta.get_field(field_name)
+                    if not value:
+                        if field.blank and (
+                            options[field_name] == "" or os.environ.get(env_var) == ""
+                        ):
+                            continue
+                        raise CommandError(
+                            "You must use --%s with --noinput." % field_name
+                        )
+                    user_data[field_name] = field.clean(value, None)
+                    if field.many_to_many and isinstance(user_data[field_name], str):
+                        user_data[field_name] = [
+                            pk.strip() for pk in user_data[field_name].split(",")
+                        ]
+
+                email_field = self.UserModel._meta.get_field("email")
+                email_value = options.get("email") or os.environ.get(
+                    "DJANGO_SUPERUSER_EMAIL"
+                )
+                if not email_value:
+                    raise CommandError("You must use --email with --noinput.")
+                user_data["email"] = email_field.clean(email_value, None)
+
+                for name in ("first_name", "last_name"):
+                    field = self.UserModel._meta.get_field(name)
+                    env_var = "DJANGO_SUPERUSER_" + name.upper()
+                    value = options.get(name) or os.environ.get(env_var)
+                    if value is None and not field.blank:
+                        raise CommandError("You must use --%s with --noinput." % name)
+                    user_data[name] = (
+                        field.clean(value, None) if value is not None else ""
+                    )
+
+                self.UserModel._default_manager.db_manager(database).create_superuser(
+                    **user_data
+                )
+                if options["verbosity"] >= 1:
+                    self.stdout.write("Superuser created successfully.")
+        except KeyboardInterrupt:
+            self.stderr.write("\nOperation cancelled.")
+            sys.exit(1)
+        except exceptions.ValidationError as e:
+            raise CommandError("; ".join(e.messages))
+        except NotRunningInTTYException:
+            self.stdout.write(
+                "Superuser creation skipped due to not running in a TTY. "
+                "You can run `manage.py createsuperuser` in your project "
+                "to create one manually."
+            )

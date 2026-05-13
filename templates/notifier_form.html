@@ -3,9 +3,10 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-7">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="h4 mb-3">{% if object %}Edit Notifier{% else %}Create Notifier{% endif %}</h1>
+        <div class="card lh-card border-0">
+            <div class="card-body p-4 p-md-5">
+                <h1 class="h4 mb-1 lh-page-title">{% if object %}Edit notifier{% else %}New notifier{% endif %}</h1>
+                <p class="lh-page-lead small mb-4">Keyword, location, and how often to scrape YellowPages.</p>
                 <form method="post">
                     {% csrf_token %}
                     {{ form.non_field_errors }}
